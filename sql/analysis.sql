@@ -25,3 +25,13 @@ SELECT date::date AS date, platform,
 FROM diario
 ORDER BY platform, date;
 
+-- Desafio 3: média móvel de 7 dias de conversões por campanha
+SELECT date::date AS date, campaign, conversions,
+       ROUND(AVG(conversions) OVER (
+         PARTITION BY campaign
+         ORDER BY date
+         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+       ), 2) AS media_movel_7d
+FROM raw.ads_performance
+ORDER BY campaign, date;
+
