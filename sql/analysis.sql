@@ -35,3 +35,19 @@ SELECT date::date AS date, campaign, conversions,
 FROM raw.ads_performance
 ORDER BY campaign, date;
 
+-- Desafio 4: Variação de gasto semana contra semana (só semanas completas)
+WITH semanal AS (
+  SELECT DATE_TRUNC('week', date)::date AS semana,
+         SUM(spend) AS spend
+  FROM raw.ads_performance
+  GROUP BY 1
+  HAVING COUNT(DISTINCT date) = 7
+)
+SELECT semana,
+       ROUND(spend::numeric, 2) AS spend,
+       ROUND(LAG(spend) OVER (ORDER BY semana)::numeric, 2) AS spend_semana_anterior,
+       ROUND(((spend - LAG(spend) OVER (ORDER BY semana))
+              / LAG(spend) OVER (ORDER BY semana) * 100)::numeric, 1) AS variacao_pct
+FROM semanal
+ORDER BY semana;
+
