@@ -51,3 +51,32 @@ SELECT semana,
 FROM semanal
 ORDER BY semana;
 
+-- Desafio 5: Detectar e remover duplicatas com ROW_NUMBER()
+-- Detectar
+WITH numerado AS (
+  SELECT *,
+         ROW_NUMBER() OVER (
+           PARTITION BY date, platform, campaign
+           ORDER BY date
+         ) AS rn
+  FROM raw.ads_performance
+)
+SELECT date::date, platform, campaign, rn
+FROM numerado
+WHERE rn > 1;
+
+-- Remover
+DELETE FROM raw.ads_performance
+WHERE ctid IN (
+  SELECT ctid
+  FROM (
+    SELECT ctid,
+           ROW_NUMBER() OVER (
+             PARTITION BY date, platform, campaign
+             ORDER BY date
+           ) AS rn
+    FROM raw.ads_performance
+  ) t
+  WHERE rn > 1
+);
+
