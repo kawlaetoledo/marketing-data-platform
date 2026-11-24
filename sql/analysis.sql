@@ -13,3 +13,15 @@ SELECT campaign, ROUND(roas::numeric, 2) AS roas, posicao
 FROM ranqueado
 WHERE posicao <= 3;
 
+-- Desafio 2: Gasto acumulado por plataforma
+WITH diario AS (
+  SELECT date, platform, SUM(spend) AS spend
+  FROM raw.ads_performance
+  GROUP BY date, platform
+)
+SELECT date::date AS date, platform,
+       ROUND(spend::numeric, 2) AS spend,
+       ROUND(SUM(spend) OVER (PARTITION BY platform ORDER BY date)::numeric, 2) AS spend_acumulado
+FROM diario
+ORDER BY platform, date;
+
